@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "ESNext",
+		"jsx": "react-jsx",
+		"declaration": true,
+		"declarationDir": "dist/types",
+		"outDir": "dist",
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"types": ["vite/client", "node"],
+		"emitDeclarationOnly": true,
+		"allowSyntheticDefaultImports": true
+	},
+	"include": ["src", "vitest.d.ts", "src/vite-env.d.ts"],
+	"exclude": ["dist", "node_modules"]
+}
