@@ -98,3 +98,12 @@ export interface Operation {
     finalCapital: number;
     kellyUsed: number;
 }
+
+export interface FixedOperation {
+    id: number;
+    result: 'Ganada' | 'Perdida';
+    initialCapital: number;
+    montoRb: number;
+    finalCapital: number;
+    riskPercentage: number;
+}
