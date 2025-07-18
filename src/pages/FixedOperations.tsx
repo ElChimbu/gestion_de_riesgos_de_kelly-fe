@@ -170,10 +170,14 @@ const FixedOperations: React.FC = () => {
     const progressTo100 = operations.length;
     const progressPercentage = Math.min((progressTo100 / 100) * 100, 100);
 
+    // Calcular el monto de riesgo sugerido para la próxima operación
+    const nextBaseCapital = operations.length > 0 ? operations[operations.length - 1].finalCapital : initialCapital;
+    const nextRiskAmount = (fixedRiskPercentage / 100) * nextBaseCapital;
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-100 to-blue-200 p-4 font-sans">
-            <div className="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-                <h1 className="text-3xl md:text-4xl font-bold text-center text-green-700 mb-8">
+        <div className="min-h-screen bg-neutral-900 p-4 font-sans">
+            <div className="max-w-6xl mx-auto bg-neutral-800 p-6 rounded-2xl shadow-lg">
+                <h1 className="text-3xl md:text-4xl font-bold text-center text-white mb-8">
                     📊 Registro de Operaciones - Riesgo Fijo (2%)
                 </h1>
 
@@ -187,31 +191,31 @@ const FixedOperations: React.FC = () => {
                     </a>
                 </div>
 
-                {loading && <div className="text-center text-blue-600">Cargando...</div>}
-                {error && <div className="text-center text-red-600">{error}</div>}
+                {loading && <div className="text-center text-blue-300">Cargando...</div>}
+                {error && <div className="text-center text-red-400">{error}</div>}
 
                 {/* Configuración */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-green-50 p-6 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-neutral-800 p-6 rounded-lg">
                     <div>
-                        <label className="block mb-1 font-medium">Capital Inicial ($)</label>
+                        <label className="block mb-1 font-medium text-white">Capital Inicial ($)</label>
                         <input
                             type="number"
-                            className="w-full p-2 rounded border border-green-300"
+                            className="w-full p-2 rounded border border-neutral-700 bg-neutral-800 text-white placeholder-gray-400"
                             value={initialCapital}
                             onChange={(e) => setInitialCapital(Number(e.target.value))}
                         />
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium">% Riesgo Fijo</label>
-                        <div className="bg-white border border-green-300 p-2 rounded font-bold text-green-700">
+                        <label className="block mb-1 font-medium text-white">% Riesgo Fijo</label>
+                        <div className="bg-black border border-white p-2 rounded font-bold text-white">
                             {fixedRiskPercentage}% (Fijo)
                         </div>
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium">Ratio R/B</label>
+                        <label className="block mb-1 font-medium text-white">Ratio R/B</label>
                         <input
                             type="number"
-                            className="w-full p-2 rounded border border-green-300"
+                            className="w-full p-2 rounded border border-neutral-700 bg-neutral-800 text-white placeholder-gray-400"
                             value={rbRatio}
                             onChange={(e) => setRbRatio(Number(e.target.value))}
                         />
@@ -219,12 +223,12 @@ const FixedOperations: React.FC = () => {
                 </div>
 
                 {/* Progreso hacia 100 operaciones */}
-                <div className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-300">
+                <div className="mb-6 bg-neutral-900 p-4 rounded-lg border border-white">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-yellow-800">Progreso hacia 100 operaciones:</span>
-                        <span className="font-bold text-yellow-900">{progressTo100}/100</span>
+                        <span className="font-semibold text-white">Progreso hacia 100 operaciones:</span>
+                        <span className="font-bold text-white">{progressTo100}/100</span>
                     </div>
-                    <div className="w-full bg-yellow-200 rounded-full h-4">
+                    <div className="w-full bg-neutral-800 rounded-full h-4">
                         <div 
                             className="bg-yellow-500 h-4 rounded-full transition-all duration-300"
                             style={{ width: `${progressPercentage}%` }}
@@ -234,10 +238,10 @@ const FixedOperations: React.FC = () => {
 
                 {/* Estadísticas */}
                 {stats && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 bg-blue-50 p-6 rounded-lg shadow-inner">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 bg-neutral-800 p-6 rounded-lg shadow-inner">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-700">{safeFixed(Number(stats.winrate))}%</div>
-                            <div className="text-sm text-blue-600">Winrate Real</div>
+                            <div className="text-2xl font-bold text-white">{safeFixed(Number(stats.winrate))}%</div>
+                            <div className="text-sm text-white">Winrate Real</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-green-700">{stats.wins}</div>
@@ -248,17 +252,29 @@ const FixedOperations: React.FC = () => {
                             <div className="text-sm text-red-600">Operaciones Perdidas</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-purple-700">{stats.totalOperations}</div>
-                            <div className="text-sm text-purple-600">Total Operaciones</div>
+                            <div className="text-2xl font-bold text-white">{operations.length}</div>
+                            <div className="text-sm text-white">Total Operaciones</div>
                         </div>
                     </div>
                 )}
 
-                {/* Capital actual */}
-                <div className="mb-6 bg-purple-50 p-4 rounded-lg border border-purple-300">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-purple-700">${safeFixed(currentCapital)}</div>
-                        <div className="text-sm text-purple-600">Capital Actual</div>
+                {/* Capital actual y margen a arriesgar */}
+                <div className="mb-6">
+                    <div className="bg-neutral-900 border border-white rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-4">
+                            <div className="text-white font-semibold text-lg flex-1">
+                                <span>🏦 Capital Inicial:</span>
+                                <span className="ml-2 text-white font-bold">${safeFixed(initialCapital)}</span>
+                            </div>
+                            <div className="text-white font-semibold text-lg flex-1">
+                                <span>💰 Capital Actual:</span>
+                                <span className="ml-2 text-white font-bold">${safeFixed(currentCapital)}</span>
+                            </div>
+                            <div className="text-white font-semibold text-lg flex-1">
+                                <span>💡 Margen a arriesgar próxima operación:</span>
+                                <span className="ml-2 text-white font-bold">${safeFixed(nextRiskAmount)} ({safeFixed(fixedRiskPercentage)}%)</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -285,26 +301,26 @@ const FixedOperations: React.FC = () => {
                 </div>
 
                 {/* Tabla */}
-                <div className="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-inner">
+                <div className="overflow-x-auto bg-neutral-900 p-4 rounded-lg shadow-inner">
                     {operations.length === 0 ? (
-                        <p className="text-center text-gray-500">No hay operaciones aún.</p>
+                        <p className="text-center text-white">No hay operaciones aún.</p>
                     ) : (
-                        <table className="min-w-full text-sm table-auto border border-gray-300 rounded-lg">
-                            <thead className="bg-gray-100">
+                        <table className="min-w-full text-sm table-auto border border-neutral-700 rounded-lg">
+                            <thead className="bg-neutral-800">
                                 <tr>
-                                    <th className="px-4 py-2">#</th>
-                                    <th className="px-4 py-2">Resultado</th>
-                                    <th className="px-4 py-2">Capital Inicial</th>
-                                    <th className="px-4 py-2">PNL (%)</th>
-                                    <th className="px-4 py-2">Capital Final</th>
-                                    <th className="px-4 py-2">% Riesgo</th>
-                                    <th className="px-4 py-2 text-center" style={{ minWidth: 140 }}>Acciones</th>
+                                    <th className="px-4 py-2 text-gray-200">#</th>
+                                    <th className="px-4 py-2 text-white">Resultado</th>
+                                    <th className="px-4 py-2 text-white">Capital Inicial</th>
+                                    <th className="px-4 py-2 text-white">PNL (%)</th>
+                                    <th className="px-4 py-2 text-white">Capital Final</th>
+                                    <th className="px-4 py-2 text-white">% Riesgo</th>
+                                    <th className="px-4 py-2 text-center text-white" style={{ minWidth: 140 }}>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {operations.map((op) => (
-                                    <tr key={op.id} className={op.result === 'Ganada' ? 'bg-green-50' : 'bg-red-50'}>
-                                        <td className="px-4 py-2 text-center">{op.id}</td>
+                                    <tr key={op.id} className={op.result === 'Ganada' ? 'bg-green-900/30' : 'bg-red-900/30'}>
+                                        <td className="px-4 py-2 text-center text-white">{op.id}</td>
                                         {editId === op.id ? (
                                             <>
                                                 <td className="px-4 py-2 text-center">
@@ -363,11 +379,11 @@ const FixedOperations: React.FC = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <td className="px-4 py-2 text-center">{op.result}</td>
-                                                <td className="px-4 py-2 text-center">${safeFixed(op.initialCapital)}</td>
+                                                <td className="px-4 py-2 text-center text-white">{op.result}</td>
+                                                <td className="px-4 py-2 text-center text-white">${safeFixed(op.initialCapital)}</td>
                                                 <td className={`px-4 py-2 text-center font-semibold ${op.montoRb >= 0 ? 'text-green-700' : 'text-red-700'}`}>{op.initialCapital !== 0 ? `${op.montoRb >= 0 ? '+' : ''}${safeFixed((op.montoRb / op.initialCapital) * 100)}%` : '0.00%'}</td>
-                                                <td className="px-4 py-2 text-center font-semibold">${safeFixed(op.finalCapital)}</td>
-                                                <td className="px-4 py-2 text-center">{safeFixed(op.riskPercentage)}%</td>
+                                                <td className="px-4 py-2 text-center font-semibold text-white">${safeFixed(op.finalCapital)}</td>
+                                                <td className="px-4 py-2 text-center text-white">{safeFixed(op.riskPercentage)}%</td>
                                                 <td className="px-4 py-2 text-center" style={{ minWidth: 140 }}>
                                                     <div className="flex justify-center gap-2">
                                                         <button onClick={() => handleEdit(op)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded">Editar</button>

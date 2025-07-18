@@ -1,11 +1,14 @@
 import RouteManager from "./hooks/RouteManager";
 import { ToastProvider } from "./hooks/ToastContext";
+import { ThemeProvider } from "./hooks/ThemeContext";
 
 function App() {
 	return (
-		<ToastProvider>
-			<RouteManager />
-		</ToastProvider>
+		<ThemeProvider>
+			<ToastProvider>
+				<RouteManager />
+			</ToastProvider>
+		</ThemeProvider>
 	);
 }
 export default App;

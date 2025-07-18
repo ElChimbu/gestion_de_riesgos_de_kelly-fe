@@ -2,3 +2,11 @@
 	background-color: #17171b;
 	min-height: 100vh;
 }
+
+body, html, #root {
+  color: #fff !important;
+}
+
+* {
+  color: #fff !important;
+}
