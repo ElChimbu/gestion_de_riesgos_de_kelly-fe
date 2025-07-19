@@ -106,4 +106,8 @@ export interface FixedOperation {
     montoRb: number;
     finalCapital: number;
     riskPercentage: number;
+    fechaHoraApertura?: string;
+    fechaHoraCierre?: string;
+    observaciones?: string;
+    imagenUrl?: string;
 }
