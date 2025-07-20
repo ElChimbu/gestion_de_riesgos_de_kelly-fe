@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import "../tailwind.css";
 import { FixedOperation } from "../types/types";
-import { fixedOperationsService, FixedOperationStats } from '../services/fixed-operations.service';
+import { fixedOperationsService } from '../services/fixed-operations.service';
+import { buildApiUrl, API_CONFIG } from '../config/api';
 
 interface FixedOperationForm extends Omit<FixedOperation, 'id'> {}
 
@@ -11,7 +12,6 @@ const FixedOperations: React.FC = () => {
     const [rbRatio, setRbRatio] = useState<number>(1.5);
     
     const [operations, setOperations] = useState<FixedOperation[]>([]);
-    const [stats, setStats] = useState<FixedOperationStats | null>(null);
     const [currentCapital, setCurrentCapital] = useState<number>(initialCapital);
     
     const [editId, setEditId] = useState<number | null>(null);
@@ -33,16 +33,12 @@ const FixedOperations: React.FC = () => {
         return value.toFixed(digits);
     };
 
-    // Cargar operaciones y estadísticas
+    // Cargar operaciones
     useEffect(() => {
         setLoading(true);
-        Promise.all([
-            fixedOperationsService.getAll(),
-            fixedOperationsService.getStats()
-        ])
-        .then(([ops, statsData]) => {
+        fixedOperationsService.getAll()
+        .then((ops) => {
             setOperations(ops);
-            setStats(statsData);
             if (ops.length > 0) {
                 setCurrentCapital(ops[ops.length - 1].finalCapital);
             } else {
@@ -82,10 +78,6 @@ const FixedOperations: React.FC = () => {
             
             setOperations((prevOps) => [...prevOps, newOp]);
             setCurrentCapital(finalCapital);
-            
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
         } catch {
             setError('Error al crear operación');
         } finally {
@@ -99,10 +91,6 @@ const FixedOperations: React.FC = () => {
         try {
             await fixedOperationsService.delete(id);
             setOperations((ops) => ops.filter((op) => op.id !== id));
-            
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
         } catch {
             setError('Error al eliminar operación');
         } finally {
@@ -147,10 +135,6 @@ const FixedOperations: React.FC = () => {
             );
             setEditId(null);
             setEditForm(null);
-
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
         } catch {
             setError('Error al actualizar operación');
         } finally {
@@ -170,7 +154,6 @@ const FixedOperations: React.FC = () => {
             await fixedOperationsService.reset();
             setOperations([]);
             setCurrentCapital(initialCapital);
-            setStats(null);
         } catch {
             setError('Error al reiniciar operaciones');
         } finally {
@@ -221,7 +204,7 @@ const FixedOperations: React.FC = () => {
             const formData = new FormData();
             formData.append('file', file);
             try {
-                const response = await fetch('/api/upload', {
+                const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.UPLOAD), {
                     method: 'POST',
                     body: formData,
                 });
@@ -299,27 +282,7 @@ const FixedOperations: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Estadísticas */}
-                {stats && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 bg-neutral-800 p-6 rounded-lg shadow-inner">
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-white">{safeFixed(Number(stats.winrate))}%</div>
-                            <div className="text-sm text-white">Winrate Real</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-green-700">{stats.wins}</div>
-                            <div className="text-sm text-green-600">Operaciones Ganadas</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-red-700">{stats.losses}</div>
-                            <div className="text-sm text-red-600">Operaciones Perdidas</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-white">{operations.length}</div>
-                            <div className="text-sm text-white">Total Operaciones</div>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Capital actual y margen a arriesgar */}
                 <div className="mb-6">
