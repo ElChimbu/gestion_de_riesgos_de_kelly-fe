@@ -10,13 +10,13 @@ export interface FixedOperationStats {
 
 export const fixedOperationsService = {
     getAll: async (): Promise<FixedOperation[]> => {
-        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS));
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.FIXED_OPERATIONS));
         if (!res.ok) throw new Error('Error al obtener operaciones de riesgo fijo');
         return res.json();
     },
     
     create: async (operation: Omit<FixedOperation, 'id'>): Promise<FixedOperation> => {
-        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS), {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.FIXED_OPERATIONS), {
             method: 'POST',
             headers: API_CONFIG.DEFAULT_HEADERS,
             body: JSON.stringify(operation),
@@ -26,7 +26,7 @@ export const fixedOperationsService = {
     },
     
     update: async (id: number, operation: Omit<FixedOperation, 'id'>): Promise<FixedOperation> => {
-        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.OPERATIONS}/${id}`), {
+        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.FIXED_OPERATIONS}/${id}`), {
             method: 'PUT',
             headers: API_CONFIG.DEFAULT_HEADERS,
             body: JSON.stringify(operation),
@@ -36,7 +36,7 @@ export const fixedOperationsService = {
     },
     
     delete: async (id: number): Promise<boolean> => {
-        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.OPERATIONS}/${id}`), {
+        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.FIXED_OPERATIONS}/${id}`), {
             method: 'DELETE',
         });
         if (!res.ok) throw new Error('Error al eliminar operación de riesgo fijo');
@@ -44,9 +44,15 @@ export const fixedOperationsService = {
     },
     
     reset: async (): Promise<void> => {
-        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS), {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.FIXED_OPERATIONS), {
             method: 'DELETE',
         });
         if (!res.ok) throw new Error('Error al eliminar todas las operaciones de riesgo fijo');
+    },
+    
+    getStats: async (): Promise<FixedOperationStats> => {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.FIXED_OPERATIONS_STATS));
+        if (!res.ok) throw new Error('Error al obtener estadísticas de operaciones fijas');
+        return res.json();
     },
 }; 

@@ -9,17 +9,21 @@ export const API_CONFIG = {
     // URL base de la API
     BASE_URL: (() => {
         const envUrl = import.meta.env.VITE_API_URL;
+        
         if (envUrl) {
             // Asegurar que no termine en slash
-            return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+            const cleanUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+            return cleanUrl;
         }
         // Fallback para desarrollo local
         return '/api';
     })(),
     
-    // Endpoints de operaciones
+    // Endpoints de operaciones normales
     ENDPOINTS: {
         OPERATIONS: '/operations',
+        FIXED_OPERATIONS: '/fixed-operations',
+        FIXED_OPERATIONS_STATS: '/fixed-operations/stats',
         UPLOAD: '/upload',
     },
     
