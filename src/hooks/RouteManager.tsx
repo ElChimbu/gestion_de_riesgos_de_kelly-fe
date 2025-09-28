@@ -1,12 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { PublicRoutes } from "../Routes";
+import { PublicRoutes, PrivateRoutes } from "../Routes";
 import PageNotFound from "../pages/PageNotFound";
+import AuthRedirect from "../components/AuthRedirect";
 
 function RouteManager() {
 	return (
 		<Router>
+			<AuthRedirect />
 			<Routes>
 				{PublicRoutes.map(({ path, component: Component }) => (
+					<Route key={path} path={path} element={<Component />} />
+				))}
+
+				{PrivateRoutes.map(({ path, component: Component }) => (
 					<Route key={path} path={path} element={<Component />} />
 				))}
 

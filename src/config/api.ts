@@ -1,5 +1,7 @@
 // src/config/api.ts
 
+import { auth } from './firebase';
+
 /**
  * Configuración centralizada de la API
  * Maneja las variables de entorno y proporciona URLs consistentes
@@ -38,6 +40,27 @@ export const API_CONFIG = {
  */
 export const buildApiUrl = (endpoint: string): string => {
     return `${API_CONFIG.BASE_URL}${endpoint}`;
+};
+
+/**
+ * Obtiene los headers de autenticación con el token de Firebase
+ */
+export const getAuthHeaders = async (): Promise<HeadersInit> => {
+    const user = auth.currentUser;
+    const headers: HeadersInit = {
+        ...API_CONFIG.DEFAULT_HEADERS,
+    };
+
+    if (user) {
+        try {
+            const token = await user.getIdToken();
+            headers['Authorization'] = `Bearer ${token}`;
+        } catch (error) {
+            console.error('Error getting auth token:', error);
+        }
+    }
+
+    return headers;
 };
 
 /**

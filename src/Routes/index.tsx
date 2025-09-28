@@ -1,13 +1,4 @@
-import Home from "../pages/Home";
-import FixedOperations from "../pages/FixedOperations";
+import { PublicRoutes } from "./PublicRoutes";
+import { PrivateRoutes } from "./PrivateRoutes";
 
-export const PublicRoutes = [
-	{
-		path: "/",
-		component: Home,
-	},
-	{
-		path: "/fixed-operations",
-		component: FixedOperations,
-	},
-];
+export { PublicRoutes, PrivateRoutes };

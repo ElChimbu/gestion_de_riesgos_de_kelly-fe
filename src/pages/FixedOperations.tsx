@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import "../tailwind.css";
 import { FixedOperation } from "../types/types";
 import { fixedOperationsService, FixedOperationStats } from '../services/fixed-operations.service';
 import { buildApiUrl, API_CONFIG } from '../config/api';

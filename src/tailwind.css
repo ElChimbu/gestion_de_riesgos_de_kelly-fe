@@ -1,6 +1,0 @@
-@import "tailwindcss";
-@import "../node_modules/@maj0codes/ui-library/dist/ui-library.css";
-
-.body {
-	background-color: #17171b !important;
-}

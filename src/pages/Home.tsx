@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import "../tailwind.css";
 import { Operation } from "../types/types";
 import { operationsService } from '../services/operations.service';
 

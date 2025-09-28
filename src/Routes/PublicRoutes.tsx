@@ -1,7 +1,8 @@
-import React from "react";
+import Login from "../pages/Login";
 
-import { ReactNode } from "react";
-
-export const PublicRoutes = ({ children }: { children: ReactNode }) => {
-	return <>{children}</>;
-};
+export const PublicRoutes = [
+	{
+		path: "/login",
+		component: Login,
+	},
+];

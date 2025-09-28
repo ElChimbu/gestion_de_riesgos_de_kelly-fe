@@ -1,0 +1,150 @@
+# Prompt Backend - Node.js + Express + Neon DB + Firebase Auth
+
+## Configurar autenticación Firebase en mi backend Node.js/Express con base de datos Neon.
+
+### **Requisitos:**
+1. Instalar Firebase Admin SDK
+2. Middleware de autenticación para verificar tokens JWT
+3. Proteger todas las rutas de la API
+4. Asociar datos con usuarios usando `uid` de Firebase
+
+### **Instalación:**
+```bash
+npm install firebase-admin
+```
+
+### **Configuración Firebase:**
+1. Ve a [Firebase Console](https://console.firebase.google.com/)
+2. Project Settings > Service Accounts > Generate new private key
+3. Descarga el archivo JSON con las credenciales
+
+### **Variables de Entorno (.env):**
+```env
+FIREBASE_PROJECT_ID=tu-project-id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@tu-project.iam.gserviceaccount.com
+```
+
+### **Implementación:**
+
+#### **1. Inicializar Firebase Admin (app.js o index.js):**
+```javascript
+const admin = require('firebase-admin');
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  })
+});
+```
+
+#### **2. Middleware de Autenticación:**
+```javascript
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token requerido' });
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    console.error('Error verificando token:', error);
+    return res.status(403).json({ error: 'Token inválido' });
+  }
+};
+
+// Aplicar a todas las rutas de la API
+app.use('/api', authenticateToken);
+```
+
+#### **3. Actualizar Esquema de Base de Datos (Neon):**
+```sql
+-- Agregar uid a las tablas existentes
+ALTER TABLE operations ADD COLUMN uid VARCHAR(255);
+ALTER TABLE fixed_operations ADD COLUMN uid VARCHAR(255);
+
+-- Crear índices para mejor rendimiento
+CREATE INDEX idx_operations_uid ON operations(uid);
+CREATE INDEX idx_fixed_operations_uid ON fixed_operations(uid);
+```
+
+#### **4. Actualizar Consultas para Filtrar por Usuario:**
+```javascript
+// En lugar de:
+const operations = await db.query('SELECT * FROM operations');
+
+// Usar:
+const operations = await db.query(
+  'SELECT * FROM operations WHERE uid = $1',
+  [req.user.uid]
+);
+
+// Para crear operaciones:
+const newOperation = await db.query(
+  'INSERT INTO operations (uid, ...) VALUES ($1, ...) RETURNING *',
+  [req.user.uid, ...otherValues]
+);
+```
+
+### **Rutas a Proteger:**
+- `GET /api/operations` - Filtrar por `req.user.uid`
+- `POST /api/operations` - Incluir `req.user.uid`
+- `PUT /api/operations/:id` - Verificar que pertenece al usuario
+- `DELETE /api/operations/:id` - Verificar que pertenece al usuario
+- `DELETE /api/operations` - Solo eliminar del usuario actual
+- `GET /api/fixed-operations` - Filtrar por `req.user.uid`
+- `POST /api/fixed-operations` - Incluir `req.user.uid`
+- `PUT /api/fixed-operations/:id` - Verificar que pertenece al usuario
+- `DELETE /api/fixed-operations/:id` - Verificar que pertenece al usuario
+- `DELETE /api/fixed-operations` - Solo eliminar del usuario actual
+- `GET /api/fixed-operations/stats` - Estadísticas del usuario actual
+
+### **Ejemplo de Verificación de Propiedad:**
+```javascript
+app.put('/api/operations/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { uid } = req.user;
+    
+    // Verificar que la operación pertenece al usuario
+    const operation = await db.query(
+      'SELECT * FROM operations WHERE id = $1 AND uid = $2',
+      [id, uid]
+    );
+    
+    if (operation.rows.length === 0) {
+      return res.status(404).json({ error: 'Operación no encontrada' });
+    }
+    
+    // Actualizar operación
+    const updatedOperation = await db.query(
+      'UPDATE operations SET ... WHERE id = $1 AND uid = $2 RETURNING *',
+      [id, uid, ...updateValues]
+    );
+    
+    res.json(updatedOperation.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+```
+
+### **Información del Usuario Disponible:**
+- `req.user.uid` - ID único del usuario
+- `req.user.email` - Email del usuario
+- `req.user.name` - Nombre del usuario
+- `req.user.picture` - URL de la foto
+
+### **Frontend ya envía:**
+```
+Authorization: Bearer <firebase_jwt_token>
+```
+
+**¡Listo! El frontend ya está configurado para enviar tokens automáticamente.** 

@@ -5,13 +5,6 @@ import App from "./App";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<div
-			style={{
-				backgroundColor: "#17171B",
-				minHeight: "100vh",
-				overflowY: "hidden",
-			}}>
-			<App />
-		</div>
+		<App />
 	</StrictMode>
 );
