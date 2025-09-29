@@ -8,27 +8,14 @@ import { auth } from './firebase';
  */
 
 export const API_CONFIG = {
-    // URL base de la API
-    BASE_URL: (() => {
-        const envUrl = import.meta.env.VITE_API_URL;
-        
-        if (envUrl) {
-            // Asegurar que no termine en slash
-            const cleanUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-            return cleanUrl;
-        }
-        // Fallback para desarrollo local
-        return '/api';
-    })(),
-    
-    // Endpoints de operaciones normales
+    // Endpoints completos desde variables de entorno
     ENDPOINTS: {
-        OPERATIONS: '/operations',
-        FIXED_OPERATIONS: '/fixed-operations',
-        FIXED_OPERATIONS_STATS: '/fixed-operations/stats',
-        UPLOAD: '/upload',
+        OPERATIONS: import.meta.env.VITE_OPERATIONS_ENDPOINT || '/api/operations',
+        FIXED_OPERATIONS: import.meta.env.VITE_FIXED_OPERATIONS_ENDPOINT || '/api/fixed-operations',
+        FIXED_OPERATIONS_STATS: import.meta.env.VITE_FIXED_OPERATIONS_STATS_ENDPOINT || '/api/fixed-operations/stats',
+        UPLOAD: import.meta.env.VITE_UPLOAD_ENDPOINT || '/api/upload',
     },
-    
+
     // Headers por defecto
     DEFAULT_HEADERS: {
         'Content-Type': 'application/json',
@@ -36,10 +23,10 @@ export const API_CONFIG = {
 } as const;
 
 /**
- * Construye una URL completa para un endpoint
+ * Obtiene la URL completa para un endpoint
  */
 export const buildApiUrl = (endpoint: string): string => {
-    return `${API_CONFIG.BASE_URL}${endpoint}`;
+    return endpoint;
 };
 
 /**
@@ -69,5 +56,5 @@ export const getAuthHeaders = async (): Promise<HeadersInit> => {
 export const ENV_CONFIG = {
     isDevelopment: import.meta.env.DEV,
     isProduction: import.meta.env.PROD,
-    apiUrl: API_CONFIG.BASE_URL,
-} as const; 
+    endpoints: API_CONFIG.ENDPOINTS,
+} as const;

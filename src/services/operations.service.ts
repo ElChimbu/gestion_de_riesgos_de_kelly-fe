@@ -1,11 +1,11 @@
 // src/services/operations.service.ts
 import { Operation } from '../types/types';
-import { buildApiUrl, getAuthHeaders } from '../config/api';
+import { buildApiUrl, getAuthHeaders, API_CONFIG } from '../config/api';
 
 export const operationsService = {
     getAll: async (): Promise<Operation[]> => {
         const headers = await getAuthHeaders();
-        const res = await fetch(buildApiUrl('/operations'), {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS), {
             headers,
         });
         if (!res.ok) throw new Error('Error al obtener operaciones');
@@ -13,7 +13,7 @@ export const operationsService = {
     },
     create: async (operation: Omit<Operation, 'id'>): Promise<Operation> => {
         const headers = await getAuthHeaders();
-        const res = await fetch(buildApiUrl('/operations'), {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS), {
             method: 'POST',
             headers,
             body: JSON.stringify(operation),
@@ -23,7 +23,7 @@ export const operationsService = {
     },
     update: async (id: number, operation: Omit<Operation, 'id'>): Promise<Operation> => {
         const headers = await getAuthHeaders();
-        const res = await fetch(buildApiUrl(`/operations/${id}`), {
+        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.OPERATIONS}/${id}`), {
             method: 'PUT',
             headers,
             body: JSON.stringify(operation),
@@ -33,7 +33,7 @@ export const operationsService = {
     },
     delete: async (id: number): Promise<boolean> => {
         const headers = await getAuthHeaders();
-        const res = await fetch(buildApiUrl(`/operations/${id}`), {
+        const res = await fetch(buildApiUrl(`${API_CONFIG.ENDPOINTS.OPERATIONS}/${id}`), {
             method: 'DELETE',
             headers,
         });
@@ -42,10 +42,10 @@ export const operationsService = {
     },
     reset: async (): Promise<void> => {
         const headers = await getAuthHeaders();
-        const res = await fetch(buildApiUrl('/operations'), {
+        const res = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.OPERATIONS), {
             method: 'DELETE',
             headers,
         });
         if (!res.ok) throw new Error('Error al eliminar todas las operaciones');
     },
-}; 
+};

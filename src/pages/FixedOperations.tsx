@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FixedOperation } from "../types/types";
 import { fixedOperationsService, FixedOperationStats } from '../services/fixed-operations.service';
 import { buildApiUrl, API_CONFIG } from '../config/api';
@@ -19,6 +19,7 @@ const FixedOperations: React.FC = () => {
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const hasLoadedRef = useRef(false);
 
     // Estado para el modal de confirmación de eliminación
     const [deleteModalId, setDeleteModalId] = useState<number | null>(null);
@@ -35,6 +36,9 @@ const FixedOperations: React.FC = () => {
 
     // Cargar operaciones y estadísticas
     useEffect(() => {
+        if (hasLoadedRef.current) return;
+        hasLoadedRef.current = true;
+
         setLoading(true);
         Promise.all([
             fixedOperationsService.getAll(),
