@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchOperations } from '../services/operations';
 
 interface DashboardStats {
   totalOperations: number;
@@ -26,25 +27,58 @@ const Dashboard: React.FC = () => {
 
   const [recentOperations, setRecentOperations] = useState<any[]>([]);
 
-  // Simular datos para el dashboard
+  // Cargar datos reales desde la API
   useEffect(() => {
-    // Aquí se cargarían los datos reales desde la API
-    setStats({
-      totalOperations: 15,
-      winRate: 73.3,
-      totalProfit: 450.50,
-      currentCapital: 2450.50,
-      initialCapital: 2000,
-      kellyAverage: 18.5,
-      fixedRiskOperations: 12,
-      kellyOperations: 3,
-    });
+    let mounted = true;
+    (async () => {
+      try {
+  const data = await fetchOperations();
+  const ops: any[] = Array.isArray(data) ? (data as any[]) : (data as any).operations ?? [];
+  const metaInitial: number | undefined = !Array.isArray(data) ? (data as any).meta?.initialCapital : undefined;
 
-    setRecentOperations([
-      { id: 1, type: 'fixed', result: 'win', amount: 40, date: '2024-01-15' },
-      { id: 2, type: 'kelly', result: 'loss', amount: -25, date: '2024-01-14' },
-      { id: 3, type: 'fixed', result: 'win', amount: 40, date: '2024-01-13' },
-    ]);
+        const totalOperations = ops.length;
+        const wins = ops.filter((o: any) => o.result === 'win').length;
+        const winRate = totalOperations ? parseFloat(((wins / totalOperations) * 100).toFixed(1)) : 0;
+        const totalProfit = ops.reduce((s: number, o: any) => s + (Number(o.amount) || 0), 0);
+        const initial = metaInitial ?? 2000;
+        const currentCapital = initial + totalProfit;
+        const kellyOps = ops.filter((o: any) => o.type === 'kelly');
+        const kellyAverage = kellyOps.length
+          ? parseFloat((kellyOps.reduce((s: number, o: any) => s + (o.kellyPercent || 0), 0) / kellyOps.length).toFixed(1))
+          : 0;
+        const fixedRiskOperations = ops.filter((o: any) => o.type === 'fixed').length;
+
+        if (!mounted) return;
+        setStats({
+          totalOperations,
+          winRate,
+          totalProfit: parseFloat(totalProfit.toFixed(2)),
+          currentCapital: parseFloat(currentCapital.toFixed(2)),
+          initialCapital: initial,
+          kellyAverage,
+          fixedRiskOperations,
+          kellyOperations: kellyOps.length,
+        });
+
+        const recent = ops
+          .slice()
+          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 3)
+          .map((o: any) => ({
+            id: o.id,
+            type: o.type,
+            result: o.result,
+            amount: Number(o.amount),
+            date: (o.date || '').split('T')[0] ?? o.date,
+          }));
+        setRecentOperations(recent);
+      } catch (err) {
+        console.error('Error cargando operaciones:', err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Removed unused functions
