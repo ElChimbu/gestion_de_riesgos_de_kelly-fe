@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FixedOperation } from "../types/types";
 import { fixedOperationsService, FixedOperationStats } from '../services/fixed-operations.service';
+import { createOperation as createGlobalOperation } from '../services/operations';
 import { buildApiUrl, API_CONFIG } from '../config/api';
 
 interface FixedOperationForm extends Omit<FixedOperation, 'id'> {}
@@ -100,6 +101,22 @@ const FixedOperations: React.FC = () => {
                 riskPercentage: fixedRiskPercentage,
                 fechaHoraApertura: nowIso
             });
+            // also replicate to global operations endpoint so Dashboard (which reads /api/operations) sees it
+            (async () => {
+                try {
+                    await createGlobalOperation({
+                        type: 'fixed',
+                        result: (newOp.result || '').toString().toLowerCase() === 'ganada' ? 'win' : 'loss',
+                        amount: Number(newOp.montoRb || 0),
+                        date: newOp.fechaHoraApertura || nowIso,
+                        kellyPercent: undefined,
+                    });
+                } catch (err) {
+                    // non-blocking: log for debugging
+                    // eslint-disable-next-line no-console
+                    console.warn('Replica to /api/operations failed:', err);
+                }
+            })();
             
             setOperations((prevOps) => {
                 const newOps = [...prevOps, newOp];
