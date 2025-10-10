@@ -34,19 +34,36 @@ const FixedOperations: React.FC = () => {
         return value.toFixed(digits);
     };
 
+    // Compute statistics from local operations array to ensure consistency with the table
+    const computeStatsFromOps = (ops: FixedOperation[], initialCap: number) => {
+    const wins = ops.filter(o => String(o.result).toLowerCase() === 'ganada' || String(o.result).toLowerCase() === 'win').length;
+    const losses = ops.filter(o => String(o.result).toLowerCase() === 'perdida' || String(o.result).toLowerCase() === 'loss').length;
+        const total = ops.length;
+        const winrate = total ? parseFloat(((wins / total) * 100).toFixed(2)) : 0;
+
+        return {
+            winrate,
+            wins,
+            losses,
+            totalOperations: total,
+            // additional fields for compatibility
+            totalProfit: ops.reduce((s, o) => s + (Number((o as any).montoRb) || 0), 0),
+            currentCapital: ops.length > 0 ? ops[ops.length - 1].finalCapital : initialCap,
+            initialCapital: ops.length > 0 ? ops[0].initialCapital : initialCap,
+        } as FixedOperationStats & { totalOperations: number; totalProfit: number; currentCapital: number };
+    };
+
     // Cargar operaciones y estadísticas
     useEffect(() => {
         if (hasLoadedRef.current) return;
         hasLoadedRef.current = true;
 
         setLoading(true);
-        Promise.all([
-            fixedOperationsService.getAll(),
-            fixedOperationsService.getStats()
-        ])
-        .then(([ops, statsData]) => {
+        fixedOperationsService.getAll()
+        .then((ops) => {
             setOperations(ops);
-            setStats(statsData);
+            const computed = computeStatsFromOps(ops, initialCapital);
+            setStats(computed as any);
             if (ops.length > 0) {
                 setCurrentCapital(ops[ops.length - 1].finalCapital);
             } else {
@@ -84,12 +101,13 @@ const FixedOperations: React.FC = () => {
                 fechaHoraApertura: nowIso
             });
             
-            setOperations((prevOps) => [...prevOps, newOp]);
-            setCurrentCapital(finalCapital);
-            
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
+            setOperations((prevOps) => {
+                const newOps = [...prevOps, newOp];
+                setCurrentCapital(finalCapital);
+                const computed = computeStatsFromOps(newOps, initialCapital);
+                setStats(computed as any);
+                return newOps;
+            });
         } catch {
             setError('Error al crear operación');
         } finally {
@@ -102,11 +120,13 @@ const FixedOperations: React.FC = () => {
         setError(null);
         try {
             await fixedOperationsService.delete(id);
-            setOperations((ops) => ops.filter((op) => op.id !== id));
-            
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
+            setOperations((ops) => {
+                const newOps = ops.filter((op) => op.id !== id);
+                const computed = computeStatsFromOps(newOps, initialCapital);
+                setStats(computed as any);
+                setCurrentCapital(newOps.length > 0 ? newOps[newOps.length - 1].finalCapital : initialCapital);
+                return newOps;
+            });
         } catch {
             setError('Error al eliminar operación');
         } finally {
@@ -152,9 +172,14 @@ const FixedOperations: React.FC = () => {
             setEditId(null);
             setEditForm(null);
 
-            // Recargar estadísticas
-            const newStats = await fixedOperationsService.getStats();
-            setStats(newStats);
+            // Recompute stats from local ops
+            setOperations((ops) => {
+                const newOps = ops.map((op) => (op.id === id ? { ...updated } : op));
+                const computed = computeStatsFromOps(newOps, initialCapital);
+                setStats(computed as any);
+                setCurrentCapital(newOps.length > 0 ? newOps[newOps.length - 1].finalCapital : initialCapital);
+                return newOps;
+            });
         } catch {
             setError('Error al actualizar operación');
         } finally {
@@ -174,7 +199,8 @@ const FixedOperations: React.FC = () => {
             await fixedOperationsService.reset();
             setOperations([]);
             setCurrentCapital(initialCapital);
-            setStats(null);
+            const computed = computeStatsFromOps([], initialCapital);
+            setStats(computed as any);
         } catch {
             setError('Error al reiniciar operaciones');
         } finally {
