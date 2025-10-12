@@ -2,7 +2,7 @@
 
 @import './styles/colors.css';
 
-@theme {
+:root {
   --font-family-quicksand: "Quicksand", "sans-serif";
 
   --color-primary-50: #f0f9ff;
@@ -258,3 +258,16 @@ td {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Marquee ticker */
+.marquee {
+  display: inline-flex;
+  gap: 24px;
+  animation: marquee 250s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to { transform: translateX(-50%); }
+}
+

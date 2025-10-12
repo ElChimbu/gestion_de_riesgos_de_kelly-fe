@@ -4,12 +4,16 @@ import KellyCalculator from "../pages/KellyCalculator";
 import StyleTest from "../components/StyleTest";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Navbar from "../components/Navbar";
+import GlobalTickers from "../components/GlobalTickers";
 
 const PrivateLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-primary">
+    <div className="min-h-screen ">
       <Navbar />
-      <main className="pt-16">
+	  <div className="">
+      <GlobalTickers />
+	  </div>
+      <main className="">
         {children}
       </main>
     </div>
