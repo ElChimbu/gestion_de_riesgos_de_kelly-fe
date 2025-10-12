@@ -10,15 +10,31 @@ interface Operation {
 
 interface RecentOperationsProps {
   operations: Operation[];
+  loading?: boolean;
 }
 
-const RecentOperations: React.FC<RecentOperationsProps> = ({ operations }) => {
+const RecentOperations: React.FC<RecentOperationsProps> = ({ operations, loading = false }) => {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <h2 className="text-xl font-semibold text-white mb-4">
         Operaciones Recientes
       </h2>
-      {operations.length > 0 ? (
+      {loading ? (
+        <div className="space-y-3">
+          {[0,1,2].map(i => (
+            <div key={i} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div className="flex items-center space-x-3 w-1/2">
+                <div className="skeleton-text sm animate-breathe w-16 rounded-full px-2 py-1"></div>
+                <div className="skeleton-text animate-breathe w-24"></div>
+              </div>
+              <div className="text-right w-1/3 space-y-2">
+                <div className="skeleton-text animate-breathe w-20 ml-auto"></div>
+                <div className="skeleton-text sm animate-breathe w-16 ml-auto"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : operations.length > 0 ? (
         <div className="space-y-3">
           {operations.map((operation) => (
             <div key={operation.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">

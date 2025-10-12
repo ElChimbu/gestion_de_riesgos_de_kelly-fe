@@ -306,7 +306,44 @@ const FixedOperations: React.FC = () => {
                     </div>
                 </div>
 
-                {loading && <div className="text-center text-secondary">Cargando...</div>}
+                {loading && (
+                    <div className="space-y-6">
+                        {/* Skeleton Estadísticas */}
+                        <div className="card">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {[0,1,2,3].map(i => (
+                                    <div key={i} className="text-center p-4 bg-card-hover rounded-lg">
+                                        <div className="skeleton-text lg animate-breathe w-24 mx-auto mb-2"></div>
+                                        <div className="skeleton-text animate-breathe w-20 mx-auto mb-2"></div>
+                                        <div className="skeleton-text sm animate-breathe w-16 mx-auto"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Skeleton Información de Capital */}
+                        <div className="card">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[0,1,2].map(i => (
+                                    <div key={i} className="p-4 bg-card-hover rounded-lg">
+                                        <div className="skeleton-text sm animate-breathe w-28 mb-2"></div>
+                                        <div className="skeleton-text lg animate-breathe w-36"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Skeleton Tabla */}
+                        <div className="card">
+                            <div className="skeleton-text lg animate-breathe w-56 mb-4"></div>
+                            <div className="space-y-3">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="h-10 skeleton animate-breathe"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {error && <div className="text-center text-error">{error}</div>}
 
                 {/* Configuración */}

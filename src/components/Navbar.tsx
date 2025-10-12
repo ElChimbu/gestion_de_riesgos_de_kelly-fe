@@ -8,6 +8,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,21 +84,54 @@ const Navbar: React.FC = () => {
               >
                 Cálculo Kelly
               </Link>
-              <Link 
-                to="/style-test" 
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive('/style-test') 
-                    ? 'bg-primary text-white shadow-lg' 
-                    : 'text-secondary hover:text-primary hover:bg-card'
-                }`}
-              >
-                Prueba Estilos
-              </Link>
             </div>
           </div>
 
           {/* Información del usuario */}
-          <div className="flex items-center space-x-4">
+          <div className="relative flex items-center space-x-4">
+            {/* Mobile burger */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-card transition-colors"
+              onClick={() => setIsMobileMenuOpen(v => !v)}
+              aria-label="Abrir menú"
+            >
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+
+            {/* Mobile menu panel */}
+            {isMobileMenuOpen && (
+              <div className="absolute right-0 top-12 w-56 md:hidden bg-card border border-primary rounded-lg shadow-xl z-40 p-2 space-y-1">
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive('/') ? 'bg-primary text-white shadow-lg' : 'text-secondary hover:text-primary hover:bg-card-hover'}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/fixed-operations"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive('/fixed-operations') ? 'bg-primary text-white shadow-lg' : 'text-secondary hover:text-primary hover:bg-card-hover'}`}
+                >
+                  Riesgo Fijo
+                </Link>
+                <Link
+                  to="/kelly-calculator"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive('/kelly-calculator') ? 'bg-primary text-white shadow-lg' : 'text-secondary hover:text-primary hover:bg-card-hover'}`}
+                >
+                  Cálculo Kelly
+                </Link>
+              </div>
+            )}
             {/* Notificaciones */}
             <button className="p-2 text-secondary hover:text-primary transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

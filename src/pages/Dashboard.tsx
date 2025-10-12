@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchOperations } from '../services/operations';
+import { fixedOperationsService } from '../services/fixed-operations.service';
 import StatsGrid from '../components/dashboard/StatsGrid';
 import QuickActions from '../components/dashboard/QuickActions';
 import RecentOperations from '../components/dashboard/RecentOperations';
@@ -29,21 +30,38 @@ const Dashboard: React.FC = () => {
   });
 
   const [recentOperations, setRecentOperations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Cargar datos reales desde la API
   useEffect(() => {
     let mounted = true;
     (async () => {
+      setLoading(true);
       try {
-  const data = await fetchOperations();
-  const ops: any[] = Array.isArray(data) ? (data as any[]) : (data as any).operations ?? [];
-  const metaInitial: number | undefined = !Array.isArray(data) ? (data as any).meta?.initialCapital : undefined;
+        const data = await fetchOperations();
+        const ops: any[] = Array.isArray(data) ? (data as any[]) : (data as any).operations ?? [];
+        const metaInitial: number | undefined = !Array.isArray(data) ? (data as any).meta?.initialCapital : undefined;
+
+        // Determine initial capital:
+        // 1) Prefer meta.initialCapital if API provides it
+        // 2) Otherwise, fall back to first fixed operation's initialCapital
+        let initialFromMeta: number | undefined = metaInitial;
+        if (initialFromMeta === undefined) {
+          try {
+            const fixedOps = await fixedOperationsService.getAll();
+            if (Array.isArray(fixedOps) && fixedOps.length > 0) {
+              initialFromMeta = Number(fixedOps[0].initialCapital) || undefined;
+            }
+          } catch {
+            // ignore - will fall back to 2000
+          }
+        }
 
         const totalOperations = ops.length;
         const wins = ops.filter((o: any) => o.result === 'win').length;
         const winRate = totalOperations ? parseFloat(((wins / totalOperations) * 100).toFixed(1)) : 0;
         const totalProfit = ops.reduce((s: number, o: any) => s + (Number(o.amount) || 0), 0);
-        const initial = metaInitial ?? 2000;
+        const initial = initialFromMeta ?? 2000;
         const currentCapital = initial + totalProfit;
         const kellyOps = ops.filter((o: any) => o.type === 'kelly');
         const kellyAverage = kellyOps.length
@@ -77,6 +95,8 @@ const Dashboard: React.FC = () => {
         setRecentOperations(recent);
       } catch (err) {
         console.error('Error cargando operaciones:', err);
+      } finally {
+        if (mounted) setLoading(false);
       }
     })();
     return () => {
@@ -87,15 +107,15 @@ const Dashboard: React.FC = () => {
   // Removed unused functions
 
   return (
-    <div className="min-h-screen bg-primary p-6">
+    <div className="bg-primary p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
-        <StatsGrid stats={stats} />
+        <StatsGrid stats={stats} loading={loading} />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <QuickActions />
-          <RecentOperations operations={recentOperations} />
+          <RecentOperations operations={recentOperations} loading={loading} />
         </div>
-        <ProgressCharts stats={stats} />
+        <ProgressCharts stats={stats} loading={loading} />
       </div>
     </div>
   );
